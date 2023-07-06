@@ -7,7 +7,7 @@ import com.example.luckycardgame.repository.CardRepository
 
 class CardServiceImpl(private val cardRepository: CardRepository) : CardService {
     override fun printCardProperties() {
-        val cards = cardRepository.getAllCards()
+        val cards = cardRepository.getAllCards(false).sortedBy { it.number }
 
         for (card in cards) {
             card.printProperties()

@@ -4,5 +4,5 @@ import com.example.luckycardgame.model.Card
 
 
 interface CardRepository {
-        fun getAllCards(): MutableList<Card>
+        fun getAllCards(isBack: Boolean): MutableList<Card>
 }

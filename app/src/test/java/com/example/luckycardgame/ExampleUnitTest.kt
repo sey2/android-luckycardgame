@@ -25,4 +25,5 @@ class ExampleUnitTest {
 
     @Test
     fun card_create_test() = cardService.printCardProperties()
+
 }
