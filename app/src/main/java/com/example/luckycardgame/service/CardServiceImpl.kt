@@ -1,6 +1,5 @@
 package com.example.luckycardgame.service
 
-import android.util.Log
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.repository.CardRepository

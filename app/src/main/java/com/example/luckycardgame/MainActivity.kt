@@ -1,21 +1,15 @@
 package com.example.luckycardgame
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.GridLayout
-import android.widget.LinearLayout
-import android.widget.TableRow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginRight
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.adapter.CardAdapter
@@ -23,7 +17,6 @@ import com.example.luckycardgame.databinding.ActivityMainBinding
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.repository.CardRepository
 import com.example.luckycardgame.repository.CardRepositoryImpl
-import com.example.luckycardgame.utils.UnicodeUtils
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,15 +34,21 @@ class MainActivity : AppCompatActivity() {
 
         cardAdapterList = mutableListOf()
 
-        val recyclerViews = arrayListOf(binding.item1Recycler,
-            binding.item2Recycler, binding.item3Recycler,
-            binding.item4Recycler, binding.item5Recycler)
+        val recyclerViews = arrayListOf(
+            binding.item1Recycler,
+            binding.item2Recycler,
+            binding.item3Recycler,
+            binding.item4Recycler,
+            binding.item5Recycler
+        )
 
         val buttons = listOf(binding.button1, binding.button2, binding.button3)
 
-        val tvTags = arrayListOf(binding.tv1Tag, binding.tv2Tag, binding.tv3Tag, binding.tv4Tag, binding.tv5Tag)
+        val tvTags = arrayListOf(
+            binding.tv1Tag, binding.tv2Tag, binding.tv3Tag, binding.tv4Tag, binding.tv5Tag
+        )
 
-        gameCardList =  cardRepository.getAllCards(false)
+        gameCardList = cardRepository.getAllCards(false)
 
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
             if (!isChecked) {
@@ -84,9 +83,11 @@ class MainActivity : AppCompatActivity() {
                     binding.button1.id -> {
                         setupGameBoard(24, 3, 8, 5, recyclerViews)
                     }
+
                     binding.button2.id -> {
                         setupGameBoard(28, 4, 7, 4, recyclerViews)
                     }
+
                     binding.button3.id -> {
                         setupGameBoard(30, 5, 6, 6, recyclerViews)
                     }
@@ -94,12 +95,17 @@ class MainActivity : AppCompatActivity() {
 
                 buttons.forEachIndexed { index, button ->
                     if (checkedId == button.id) {
-                        binding.item4Linear.visibility = if (index == 0) View.INVISIBLE else View.VISIBLE
-                        binding.item5Linear.visibility = if (index == 0 || index == 1) View.GONE else View.VISIBLE
+                        binding.item4Linear.visibility =
+                            if (index == 0) View.INVISIBLE else View.VISIBLE
+                        binding.item5Linear.visibility =
+                            if (index == 0 || index == 1) View.GONE else View.VISIBLE
 
                         buttons.forEachIndexed { innerIndex, innerButton ->
-                            val drawableResId = if (index == innerIndex) R.drawable.baseline_check_20 else 0
-                            innerButton.setCompoundDrawablesWithIntrinsicBounds(drawableResId, 0, 0, 0)
+                            val drawableResId =
+                                if (index == innerIndex) R.drawable.baseline_check_20 else 0
+                            innerButton.setCompoundDrawablesWithIntrinsicBounds(
+                                drawableResId, 0, 0, 0
+                            )
                         }
 
 
@@ -112,14 +118,19 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun setupGameBoard(totalCardCount: Int, recyclerViewCount: Int, cardsPerRow: Int, colCount: Int, recyclerViews: ArrayList<RecyclerView> ) {
+    private fun setupGameBoard(
+        totalCardCount: Int,
+        recyclerViewCount: Int,
+        cardsPerRow: Int,
+        colCount: Int,
+        recyclerViews: ArrayList<RecyclerView>
+    ) {
         if (gameCardList.size < totalCardCount) {
             gameCardList.clear()
             gameCardList = cardRepository.getAllCards(false)
         }
 
-        if(totalCardCount == 24)
-            gameCardList.removeIf { card -> card.number == 12 }
+        if (totalCardCount == 24) gameCardList.removeIf { card -> card.number == 12 }
 
         for (i in 0 until recyclerViewCount) {
             setupRecyclerView(recyclerViews[i], i != 0, cardsPerRow)
@@ -147,14 +158,15 @@ class MainActivity : AppCompatActivity() {
             var cardView = LayoutInflater.from(this).inflate(R.layout.recycler_item, null)
 
             cardView.layoutParams = ViewGroup.MarginLayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 leftMargin = marginDp
             }
 
-            cardView.findViewById<ConstraintLayout>(R.id.card_sub_layout).setBackgroundResource(R.drawable.logo)
-            cardView.findViewById<CardView>(R.id.cv_card).setBackgroundResource(R.drawable.linear_round)
+            cardView.findViewById<ConstraintLayout>(R.id.card_sub_layout)
+                .setBackgroundResource(R.drawable.logo)
+            cardView.findViewById<CardView>(R.id.cv_card)
+                .setBackgroundResource(R.drawable.linear_round)
             cardView.findViewById<TextView>(R.id.tv_emoji).visibility = View.GONE
             cardView.findViewById<TextView>(R.id.tv_topLeft).visibility = View.GONE
             cardView.findViewById<TextView>(R.id.tv_bottomRight).visibility = View.GONE
@@ -167,11 +179,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView(recyclerView: RecyclerView, isBack: Boolean, cardNum: Int) {
         var randomCards = mutableListOf<Card>()
 
-        for(i in 0 until cardNum)
-            randomCards.add(i, gameCardList.removeFirst())
+        for (i in 0 until cardNum) randomCards.add(i, gameCardList.removeFirst())
 
         val adapter = CardAdapter(randomCards, isBack)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.adapter = adapter
 
 

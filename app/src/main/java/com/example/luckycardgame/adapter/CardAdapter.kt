@@ -2,7 +2,6 @@ package com.example.luckycardgame.adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.R
 import com.example.luckycardgame.databinding.RecyclerItemBinding
 import com.example.luckycardgame.model.Card
-import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.utils.UnicodeUtils
 
 

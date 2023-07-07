@@ -1,12 +1,8 @@
 package com.example.luckycardgame.repository
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.luckycardgame.R
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
-import java.time.LocalTime
-import kotlin.random.Random
 
 class CardRepositoryImpl : CardRepository {
     override fun getAllCards(isBack: Boolean): MutableList<Card>
