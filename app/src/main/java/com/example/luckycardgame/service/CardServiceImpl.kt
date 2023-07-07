@@ -1,5 +1,6 @@
 package com.example.luckycardgame.service
 
+import android.util.Log
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.repository.CardRepository
@@ -20,5 +21,6 @@ fun Card.printProperties() {
         is CardType.Cat -> "\uD83D\uDC31" // 🐱
         is CardType.Cow -> "\uD83D\uDC2E" // 🐮
     }
-    println("Number: ${this.number}, Emoji: $emoji")
+
+    Log.d("Card", "Number: ${this.number}, Emoji: $emoji")
 }

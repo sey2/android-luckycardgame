@@ -5,6 +5,7 @@ import com.example.luckycardgame.repository.CardRepositoryImpl
 import com.example.luckycardgame.service.CardService
 import com.example.luckycardgame.service.CardServiceImpl
 import com.example.luckycardgame.service.printProperties
+import com.example.luckycardgame.utils.UnicodeUtils
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -24,6 +25,8 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun card_create_test() = cardService.printCardProperties()
+    fun test_CardPrinting_PrintsCardProperties_Successfully()
+        = cardRepository.getAllCards(false)
+            .forEach{println("Number: ${it.number}, Emoji: ${UnicodeUtils.convertToEmoji(it.type)}")}
 
 }
