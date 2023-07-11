@@ -1,6 +1,7 @@
 package com.example.luckycardgame.adapter
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -13,15 +14,13 @@ import com.example.luckycardgame.utils.UnicodeUtils
 
 
 class CardAdapter(private val cardList: List<Card>, val isBack: Boolean) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
-    lateinit var binding: RecyclerItemBinding
-    lateinit var itemList: MutableList<Card>
-    private var context: View? = null
+    private var itemList: MutableList<Card> = cardList.toMutableList()
+    private var parentContext: Context? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        binding = RecyclerItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = RecyclerItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
-        context = parent
-
+        parentContext = parent.context
         itemList = cardList.toMutableList()
 
         return CardViewHolder(binding)
@@ -34,7 +33,6 @@ class CardAdapter(private val cardList: List<Card>, val isBack: Boolean) : Recyc
 
         var card = cardList[position]
         card.clicked = isBack
-
 
         holder.bind(card)
     }
