@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+경import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -17,22 +18,19 @@ import com.example.luckycardgame.databinding.ActivityMainBinding
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.repository.CardRepository
 import com.example.luckycardgame.repository.CardRepositoryImpl
+import com.google.android.material.button.MaterialButton
 
 
 class MainActivity : AppCompatActivity() {
 
-    val cardRepository: CardRepository = CardRepositoryImpl()
-
-    private lateinit var gameCardList: MutableList<Card>
+    private val cardRepository: CardRepository = CardRepositoryImpl()
+    private var gameCardList = cardRepository.getAllCards(false)
+    private var cardAdapterList: MutableList<CardAdapter> = mutableListOf()
     private lateinit var binding: ActivityMainBinding
-    private lateinit var cardAdapterList: MutableList<CardAdapter>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.rootLayout)
-
-        cardAdapterList = mutableListOf()
 
         val recyclerViews = arrayListOf(
             binding.item1Recycler,
@@ -42,80 +40,70 @@ class MainActivity : AppCompatActivity() {
             binding.item5Recycler
         )
 
-        val buttons = listOf(binding.button1, binding.button2, binding.button3)
+        val buttons = arrayListOf(binding.button1, binding.button2, binding.button3)
 
         val tvTags = arrayListOf(
             binding.tv1Tag, binding.tv2Tag, binding.tv3Tag, binding.tv4Tag, binding.tv5Tag
         )
 
-        gameCardList = cardRepository.getAllCards(false)
-
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
             if (!isChecked) {
-                recyclerViews.forEachIndexed { index, recyclerView ->
-                    recyclerView.visibility = View.GONE
-                    tvTags[index].visibility = View.VISIBLE
-                }
-
-                // 똑같은 버튼 두번 눌렀을 때 체크 벡터 모양 없애기
-                buttons.forEachIndexed { index, button ->
-                    if (checkedId == button.id) {
-                        buttons.forEachIndexed { innerIndex, innerButton ->
-                            innerButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                        }
-
-                    }
-                }
-
-                // gridLayout 아이템 요소 모두 제거
-                binding.bottomLayout.removeAllViews()
-
+                handleUncheckedState(buttons, checkedId)
             } else {
-                // recyclerView Setting
-                recyclerViews.forEachIndexed { index, recyclerView ->
-                    recyclerView.visibility = View.VISIBLE
-                    tvTags[index].visibility = View.GONE
+                handleCheckedState(recyclerViews, buttons, checkedId)
+            }
+        }
+
+    }
+
+    private fun handleUncheckedState(buttons: ArrayList<MaterialButton>, checkedId: Int) {
+        buttons.forEach { button ->
+            if (checkedId == button.id) {
+                buttons.forEach { innerButton ->
+                    innerButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                 }
+            }
+        }
+    }
 
-                Log.d("ToggleBtn", "Before: ${gameCardList.size}")
+    private fun handleCheckedState(
+        recyclerViews: ArrayList<RecyclerView>,
+        buttons: ArrayList<MaterialButton>,
+        checkedId: Int
+    ) {
 
-                when (checkedId) {
-                    binding.button1.id -> {
-                        setupGameBoard(24, 3, 8, 5, recyclerViews)
-                    }
+        when (checkedId) {
+            binding.button1.id -> setupGameBoard(24, 3, 8, 5, recyclerViews)
+            binding.button2.id -> setupGameBoard(28, 4, 7, 4, recyclerViews)
+            binding.button3.id -> setupGameBoard(30, 5, 6, 6, recyclerViews)
+        }
 
-                    binding.button2.id -> {
-                        setupGameBoard(28, 4, 7, 4, recyclerViews)
-                    }
+        updateButtonState(buttons, checkedId)
+    }
 
-                    binding.button3.id -> {
-                        setupGameBoard(30, 5, 6, 6, recyclerViews)
-                    }
-                }
+    private fun updateButtonState(buttons: ArrayList<MaterialButton>, checkedId: Int) {
+        buttons.forEachIndexed { index, button ->
+            if (checkedId == button.id) {
+                val visibility1 = if (index == 0) View.INVISIBLE else View.VISIBLE
+                val visibility2 = if (index == 0 || index == 1) View.GONE else View.VISIBLE
 
-                buttons.forEachIndexed { index, button ->
-                    if (checkedId == button.id) {
-                        binding.item4Linear.visibility =
-                            if (index == 0) View.INVISIBLE else View.VISIBLE
-                        binding.item5Linear.visibility =
-                            if (index == 0 || index == 1) View.GONE else View.VISIBLE
+                binding.tv4Tag.visibility = visibility1
+                binding.item4Recycler.visibility = visibility1
+                binding.tv5Tag.visibility = visibility2
+                binding.item5Recycler.visibility = visibility2
 
-                        buttons.forEachIndexed { innerIndex, innerButton ->
-                            val drawableResId =
-                                if (index == innerIndex) R.drawable.baseline_check_20 else 0
-                            innerButton.setCompoundDrawablesWithIntrinsicBounds(
-                                drawableResId, 0, 0, 0
-                            )
-                        }
-
-
-                        Log.d("ToggleBtn", "${index + 1}번 눌러짐")
-                    }
+                buttons.forEachIndexed { innerIndex, innerButton ->
+                    val drawableResId = if (index == innerIndex) R.drawable.baseline_check_20 else 0
+                    innerButton.setCompoundDrawablesWithIntrinsicBounds(
+                        drawableResId,
+                        0,
+                        0,
+                        0
+                    )
                 }
 
             }
         }
-
     }
 
     private fun setupGameBoard(
@@ -144,9 +132,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ResourceType")
     private fun setupGridLayout(colCount: Int) {
         val (marginDp, paddingLeft, paddingTop) = when (colCount) {
-            5 -> Triple(30, 8, 120)
-            4 -> Triple(54, 32, 120)
-            else -> Triple(4, 4, 80)
+            5 -> Triple(30, 8, 60)
+            4 -> Triple(54, 32, 60)
+            else -> Triple(4, 4, 30)
         }
 
         binding.bottomLayout.removeAllViews()
