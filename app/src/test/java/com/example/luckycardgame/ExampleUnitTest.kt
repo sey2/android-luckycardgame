@@ -25,7 +25,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun test_CardPrinting_PrintsCardProperties_Successfully()
+    fun cardProperties_print_success()
         = cardRepository.getAllCards(false)
             .forEach{println("Number: ${it.number}, Emoji: ${UnicodeUtils.convertToEmoji(it.type)}")}
 
