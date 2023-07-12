@@ -4,7 +4,6 @@ import com.example.luckycardgame.repository.CardRepository
 import com.example.luckycardgame.repository.CardRepositoryImpl
 import com.example.luckycardgame.utils.UnicodeUtils
 import org.junit.Test
-
 import org.junit.Assert.*
 
 /**
