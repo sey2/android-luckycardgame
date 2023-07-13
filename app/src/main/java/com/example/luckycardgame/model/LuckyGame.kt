@@ -61,6 +61,17 @@ class LuckyGame(participantCount: Int) {
         return cardService.hasTripleMatchWithFloorCard(participant1, participant2)
     }
 
+    fun isNextTurn(): Int{
+        val index = currentPlayerId.split(" ")[1].toInt()
+        val participant = getParticipant(currentPlayerId)
+
+        if ((participant.selectCount % 3 == 0 )|| participant.cards.size == participant.selectedCard.size){
+            return index
+        }
+
+        return -1
+    }
+
     /**
      * 바닥 카드 리스트를 반환합니다.
      *
