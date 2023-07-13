@@ -25,8 +25,13 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun cardProperties_print_success()
-        = cardRepository.getAllCards(false)
-            .forEach{println("Number: ${it.number}, Emoji: ${UnicodeUtils.convertToEmoji(it.type)}")}
+    fun cardProperties_print_success() {
+        val allCards = cardRepository.getAllCards(false)
 
+        for (card in allCards) {
+            assertNotNull(card)
+            val emoji = UnicodeUtils.convertToEmoji(card.type)
+            println("Number: ${card.number}, Emoji: $emoji")
+        }
+    }
 }
