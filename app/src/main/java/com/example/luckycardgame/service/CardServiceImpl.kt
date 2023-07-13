@@ -7,7 +7,7 @@ import com.example.luckycardgame.repository.CardRepository
 
 class CardServiceImpl(private val cardRepository: CardRepository) : CardService {
     override fun printCardProperties() {
-        val cards = cardRepository.getAllCards()
+        val cards = cardRepository.getAllCards(false).sortedBy { it.number }
 
         for (card in cards) {
             card.printProperties()
@@ -21,5 +21,6 @@ fun Card.printProperties() {
         is CardType.Cat -> "\uD83D\uDC31" // 🐱
         is CardType.Cow -> "\uD83D\uDC2E" // 🐮
     }
-    println("Number: ${this.number}, Emoji: $emoji")
+
+    Log.d("Card", "Number: ${this.number}, Emoji: $emoji")
 }
