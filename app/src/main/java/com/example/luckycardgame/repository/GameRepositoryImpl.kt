@@ -1,4 +1,5 @@
 package com.example.luckycardgame.repository
+
 import com.example.luckycardgame.R
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
@@ -9,17 +10,15 @@ import com.example.luckycardgame.model.Participant
  * 주요 변수는 게임에 사용할 모든 카드, 참가자별로 카드를 저장하는 맵, 바닥에 놓인 카드를 저장하는 리스트입니다.
  */
 
-class CardRepositoryImpl(private val participantCount: Int) : CardRepository {
+class GameRepositoryImpl(private val participantCount: Int) : GameRepository {
     private lateinit var allCards: MutableList<Card>
     private var participants: MutableMap<String, Participant> = mutableMapOf()
-    private var floorCards: MutableList<Card> = mutableListOf()
+    private var resultCardSet: MutableMap<String, Participant> = mutableMapOf()
 
-    /**
-     * 참가자에게 카드를 분배하고 카드를 초기화하는 메소드입니다.
-     * @param participantCount 카드를 받을 참가자의 수입니다.
-     */
+    private var floorCards: MutableList<Card> = mutableListOf()
     override fun initializeCards(participantCount: Int) {
-        allCards = getAllCards(false).toMutableList()
+        val rawCards = getAllCards(false)
+        allCards = mutableListOf()
 
         val participantCardCounts = when (participantCount) {
             3 -> 8
@@ -28,8 +27,15 @@ class CardRepositoryImpl(private val participantCount: Int) : CardRepository {
             else -> throw IllegalArgumentException("Invalid participant count: $participantCount")
         }
 
+        // 카드를 번호별로 그룹화하고 각 그룹을 섞음
+        val groupedCards = rawCards.groupBy { it.number }.values.map { it.shuffled() }
+        for (group in groupedCards) {
+            allCards.addAll(group)
+        }
+
         for (i in 0 until participantCount) {
-            participants["Participant $i"] = Participant("Participant $i") // 새 참가자 생성
+            // 새 참가자 생성
+            participants["Participant $i"] = Participant("Participant $i", leftSelectIndex = 0, rightSelectIndex = participantCardCounts-1, selectCount =  0)
 
             for (j in 0 until participantCardCounts) {
                 participants["Participant $i"]?.addCard(allCards.removeFirst())
@@ -40,12 +46,6 @@ class CardRepositoryImpl(private val participantCount: Int) : CardRepository {
 
         allCards.clear()
     }
-
-    /**
-     * 모든 카드를 가져오는 메소드입니다.
-     * @param isBack 카드의 앞면 혹은 뒷면을 선택하는 파라미터입니다.
-     * @return isBack에 따른 모든 카드의 리스트를 반환합니다.
-     */
     override fun getAllCards(isBack: Boolean): MutableList<Card> {
         val cards = mutableListOf<Card>()
 
@@ -62,61 +62,34 @@ class CardRepositoryImpl(private val participantCount: Int) : CardRepository {
 
         return shuffledCards
     }
-
-    /**
-     * 특정 참가자가 가진 카드를 가져오는 메소드입니다.
-     * @param participant 카드를 가져올 참가자의 이름입니다.
-     * @return 해당 참가자가 가진 카드의 리스트를 반환합니다.
-     */
     override fun getCardsForParticipant(participant: String): MutableList<Card> {
         return participants[participant]?.cards ?: mutableListOf()
     }
 
-    /**
-     * 모든 참가자들을 반환하는 메소드입니다.
-     * @return 모든 참가자들을 반환합니다.
-     */
     override fun getAllPartripants(): MutableMap<String, Participant> {
         return participants
     }
 
-    /**
-     * 바닥에 놓인 카드를 가져오는 메소드입니다.
-     * @return 바닥에 놓인 카드의 리스트를 반환합니다.
-     */
     override fun getFloorCards(): MutableList<Card> {
         return floorCards
     }
 
-    /**
-     * 모든 카드의 수를 가져오는 메소드입니다.
-     * @return 모든 카드의 총 수를 반환합니다.
-     */
     override fun getTotalCardCount(): Int {
         return participants.values.sumOf { it.cards.size }
     }
 
-    /**
-     * 게임에 참가한 모든 참가자를 가져오는 메소드입니다.
-     * @return 참가한 모든 참가자의 이름이 담긴 Set을 반환합니다.
-     */
     override fun getParticipants(): Set<String> {
         return participants.keys
     }
 
-    /**
-     * 바닥에 놓인 카드를 셋팅하는 메소드입니다.
-     * @param sortedfloorCards 새롭게 셋팅할 카드의 리스트입니다.
-     */
+    override fun getParticipant(participantId: String): Participant {
+        return participants[participantId] ?: throw Error("The participant ID could not be found.")
+    }
+
     override fun setFloorCards(sortedfloorCards: MutableList<Card>) {
         this.floorCards = sortedfloorCards
     }
 
-    /**
-     * 참가자의 카드를 셋팅하는 메소드입니다.
-     * @param participant 카드를 셋팅할 참가자의 이름입니다.
-     * @param sortedParticipantCard 새롭게 셋팅할 카드의 리스트입니다.
-     */
     override fun setParticipantCards(
         participant: String,
         sortedParticipantCard: MutableList<Card>
@@ -124,10 +97,39 @@ class CardRepositoryImpl(private val participantCount: Int) : CardRepository {
         participants[participant]!!.cards = sortedParticipantCard
     }
 
-    /**
-     * 랜덤한 카드 타입을 반환하는 메소드입니다.
-     * @return Dog, Cat, Cow 중 랜덤하게 선택된 카드 타입을 반환합니다.
-     */
+    override fun setParticipant(participantId: String, participant: Participant) {
+        participants[participantId] = participant
+    }
+
     private fun getRandomCardType(): CardType =
         listOf(CardType.Dog, CardType.Cat, CardType.Cow).random()
+
+    override fun getTripleSelectedCards(): Map<String, List<Int>> {
+        val triples = mutableMapOf<String, List<Int>>()
+
+        for ((key, value) in participants) {
+
+            // 참가자의 선택한 카드 리스트를 가져옴
+            val participantSelectedCards = value.selectedCard.map { value.cards[it] }
+
+            // 카드 번호 별로 그룹화
+            val groupedByNumber = participantSelectedCards.groupBy { it.number }
+
+            // 3장 이상인 카드 그룹 찾기
+            val tripleCardNumbers = groupedByNumber.filter { it.value.size >= 3 }.keys.toList()
+
+            if (tripleCardNumbers.isNotEmpty()) {
+                triples[key] = tripleCardNumbers
+            }
+        }
+        return triples
+    }
+
+    override fun getResultCardSet(): MutableMap<String, Participant> {
+        return resultCardSet
+    }
+
+    override fun setResultCardSet() {
+
+    }
 }
