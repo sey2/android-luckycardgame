@@ -15,17 +15,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.adapter.CardAdapter
 import com.example.luckycardgame.databinding.ActivityMainBinding
 import com.example.luckycardgame.model.Card
-import com.example.luckycardgame.repository.CardRepository
-import com.example.luckycardgame.repository.CardRepositoryImpl
+import com.example.luckycardgame.model.LuckyGame
 import com.google.android.material.button.MaterialButton
 
-
 class MainActivity : AppCompatActivity() {
-
-    private val cardRepository: CardRepository = CardRepositoryImpl()
-    private var gameCardList = cardRepository.getAllCards(false)
-    private var cardAdapterList: MutableList<CardAdapter> = mutableListOf()
+    lateinit var game: LuckyGame
     private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -42,8 +38,14 @@ class MainActivity : AppCompatActivity() {
         val buttons = arrayListOf(binding.button1, binding.button2, binding.button3)
 
         val tvTags = arrayListOf(
-            binding.tv1Tag, binding.tv2Tag, binding.tv3Tag, binding.tv4Tag, binding.tv5Tag
+            binding.tv1Tag,
+            binding.tv2Tag,
+            binding.tv3Tag,
+            binding.tv4Tag,
+            binding.tv5Tag
         )
+
+        game = LuckyGame(5)
 
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
             if (!isChecked) {
@@ -52,7 +54,6 @@ class MainActivity : AppCompatActivity() {
                 handleCheckedState(recyclerViews, buttons, checkedId)
             }
         }
-
     }
 
     private fun handleUncheckedState(buttons: ArrayList<MaterialButton>, checkedId: Int) {
@@ -70,11 +71,10 @@ class MainActivity : AppCompatActivity() {
         buttons: ArrayList<MaterialButton>,
         checkedId: Int
     ) {
-
         when (checkedId) {
-            binding.button1.id -> setupGameBoard(24, 3, 8, 5, recyclerViews)
-            binding.button2.id -> setupGameBoard(28, 4, 7, 4, recyclerViews)
-            binding.button3.id -> setupGameBoard(30, 5, 6, 6, recyclerViews)
+            binding.button1.id -> setupGameBoard(24, 3, 5, recyclerViews)
+            binding.button2.id -> setupGameBoard(28, 4, 4, recyclerViews)
+            binding.button3.id -> setupGameBoard(30, 5, 6, recyclerViews)
         }
 
         updateButtonState(buttons, checkedId)
@@ -100,7 +100,6 @@ class MainActivity : AppCompatActivity() {
                         0
                     )
                 }
-
             }
         }
     }
@@ -108,24 +107,22 @@ class MainActivity : AppCompatActivity() {
     private fun setupGameBoard(
         totalCardCount: Int,
         recyclerViewCount: Int,
-        cardsPerRow: Int,
         colCount: Int,
         recyclerViews: ArrayList<RecyclerView>
     ) {
-        if (gameCardList.size < totalCardCount) {
-            gameCardList.clear()
-            gameCardList = cardRepository.getAllCards(false)
-        }
+        game = LuckyGame(recyclerViewCount)
 
-        if (totalCardCount == 24) gameCardList.removeIf { card -> card.number == 12 }
-
-        for (i in 0 until recyclerViewCount) {
-            setupRecyclerView(recyclerViews[i], i != 0, cardsPerRow)
+        for (i in 1..recyclerViewCount) {
+            setupRecyclerView(
+                recyclerViews[i - 1],
+                (i - 1) != 0,
+                game.getParticipantCards("Participant ${i - 1}")
+            )
         }
 
         setupGridLayout(colCount)
 
-        Log.d("ToggleBtn", "After: ${gameCardList.size}")
+        Log.d("ToggleBtn", "After: ${game.getTotalCardCount()}")
     }
 
     @SuppressLint("ResourceType")
@@ -140,8 +137,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomLayout.columnCount = colCount
         binding.bottomLayout.setPadding(paddingLeft, paddingTop, 0, 0)
 
-        // GridLayout에 동적으로 아이템 추가
-        for (card in gameCardList) {
+        for (card in game.getFloorCards()) {
             var cardView = LayoutInflater.from(this).inflate(R.layout.recycler_item, null)
 
             cardView.layoutParams = ViewGroup.MarginLayoutParams(
@@ -158,25 +154,19 @@ class MainActivity : AppCompatActivity() {
             cardView.findViewById<TextView>(R.id.tv_topLeft).visibility = View.GONE
             cardView.findViewById<TextView>(R.id.tv_bottomRight).visibility = View.GONE
 
-            // 카드 뷰를 GridLayout에 추가
             binding.bottomLayout.addView(cardView)
         }
     }
 
-    private fun setupRecyclerView(recyclerView: RecyclerView, isBack: Boolean, cardNum: Int) {
-        var randomCards = mutableListOf<Card>()
+    private fun setupRecyclerView(
+        recyclerView: RecyclerView,
+        isBack: Boolean,
+        cardList: List<Card>?
+    ) {
+        val adapter = CardAdapter(cardList!!, isBack)
 
-        for (i in 0 until cardNum) randomCards.add(i, gameCardList.removeFirst())
-
-        val adapter = CardAdapter(randomCards, isBack)
         recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.adapter = adapter
-
-
-        cardAdapterList.add(adapter)
     }
-
 }
-
-
