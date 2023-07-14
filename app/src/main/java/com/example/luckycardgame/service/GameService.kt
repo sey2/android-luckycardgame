@@ -2,7 +2,7 @@ package com.example.luckycardgame.service
 
 import com.example.luckycardgame.model.Card
 
-interface CardService {
+interface GameService {
     /**
      * 카드의 속성을 출력하는 함수.
      */
@@ -52,5 +52,10 @@ interface CardService {
      */
     fun sortFloorCards(reverse: Boolean)
 
+    fun findSumAndSubResultSeven(): String
+
+    fun findParticipantWithSeven(): String
+
+    fun findParticipantsWithNoCards(): String
 
 }

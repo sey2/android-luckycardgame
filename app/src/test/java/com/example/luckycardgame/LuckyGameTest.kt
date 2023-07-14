@@ -2,8 +2,26 @@ import com.example.luckycardgame.R
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.model.LuckyGame
-import com.example.luckycardgame.repository.CardRepository
+<<<<<<< HEAD
 import junit.framework.TestCase.assertEquals
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 939936c ([박세영] 럭키 카드 게임 테스트 코드 구현 (07.09))
+=======
+=======
+>>>>>>> 9864c98 ([박세영] 클래스 이름 변경(07.12))
+=======
+>>>>>>> 8b08150 ([박세영] 가짜 객체 추가(07.12))
+=======
+>>>>>>> 96bb4d7 ([박세영] 충돌 해결(07.12))
+
+>>>>>>> f948cf7 ([박세영] 가짜 객체 추가(07.12))
+>>>>>>> 691b0ea ([박세영] 스타일 태그 정의 (07.14))
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Before

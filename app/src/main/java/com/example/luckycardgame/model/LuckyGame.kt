@@ -1,64 +1,78 @@
 package com.example.luckycardgame.model
 
-import com.example.luckycardgame.repository.CardRepository
-import com.example.luckycardgame.repository.CardRepositoryImpl
-import com.example.luckycardgame.service.CardService
-import com.example.luckycardgame.service.CardServiceImpl
+import com.example.luckycardgame.repository.GameRepository
+import com.example.luckycardgame.repository.GameRepositoryImpl
+import com.example.luckycardgame.service.GameService
+import com.example.luckycardgame.service.GameServiceImpl
 
 class LuckyGame(participantCount: Int) {
-    private var cardRepository: CardRepository = CardRepositoryImpl(participantCount)
-    val cardService: CardService = CardServiceImpl(cardRepository, participantCount)
+    private var gameRepository: GameRepository = GameRepositoryImpl(participantCount)
+    val service: GameService = GameServiceImpl(gameRepository, participantCount)
+    var currentPlayerId = "Participant 0"
+    var turn = 1
 
     init {
-        cardService.distributeCards()
+        service.distributeCards()
+        gameRepository.getParticipants().forEach { name -> service.sortParticipantCards(name, false) }
     }
 
     /**
-     * 전체 카드의 개수를 반환합니다.
+     * 특정 참가자가 카드를 선택하는 메소드입니다.
      *
-     * @return 전체 카드의 개수
+     * @param participantName 참가자의 이름입니다.
+     * @param cardIndex 사용자가 선택한 카드의 인덱스입니다.
+     * @return 사용자가 선택한 카드를 집을 수 있으면 true, 집을 수 없으면 false 반환
      */
-    fun getTotalCardCount(): Int {
-        return cardRepository.getTotalCardCount()
+    fun canSelected(participantName: String, cardIndex: Int): Boolean {
+        val participant = gameRepository.getParticipant(participantName)
+
+        require(cardIndex in 0 until participant.cards.size) { "카드 인덱스가 범위를 벗어났습니다." }
+
+        val isCanSelectIndex = (participant.leftSelectIndex == cardIndex || participant.rightSelectIndex == cardIndex)
+
+        // 선택한 카드가 이미 선택되었는지 확인
+        if (!participant.selectedCard.contains(cardIndex) && isCanSelectIndex)  {
+            getParticipant(currentPlayerId).selectCount++
+        }
+
+        when (cardIndex) {
+            participant.leftSelectIndex ->  participant.leftSelectIndex = cardIndex + 1
+            participant.rightSelectIndex -> participant.rightSelectIndex = cardIndex -1
+            else -> return false
+        }
+
+        participant.addSelectedCard(cardIndex)
+
+        if (participant.selectCount % 3 == 0 )
+            gameRepository.setParticipant(participantName, participant)
+
+        return true
     }
 
-    /**
-     * 참가자들 중에 세 장 이상의 같은 번호를 가진 카드가 있는지 확인합니다.
-     *
-     * @return 세 장 이상의 같은 번호를 가진 카드가 있으면 true, 없으면 false
-     */
-    fun isTripleMatchPresent(): Boolean {
-        return cardService.isTripleMatchPresent()
-    }
+    fun turnRest(){
+        var tripleCardSet = getParticipantsTripleSelectedCardNum()
 
-    /**
-     * 바닥에 있는 카드 정렬.
-     *
-     * @param reverse 역순으로 정렬 할지 여부
-     */
-    fun sortFloorCards(reverse: Boolean) {
-        cardService.sortFloorCards(reverse)
-    }
+        for((participantId, cardList) in tripleCardSet){
+            val participant = gameRepository.getParticipant(participantId)
 
-    /**
-     * 정해진 참가자의 카드를 번호에 따라 정렬합니다.
-     *
-     * @param participant 정렬할 참가자의 이름
-     * @param reverse 역순으로 정렬 할지 여부
-     */
-    fun sortParticipantCards(participant: String, reverse: Boolean) {
-        cardService.sortParticipantCards(participant, reverse)
-    }
+            cardList.forEach { target ->
+                // 사용자 선택 카드 리스트에서도 제거
+                participant.removeSelectedCard(target)
 
-    /**
-     * 특정 참가자와 다른 참가자의 가장 높은 숫자 카드 또는 가장 낮은 숫자와 바닥 카드 중 아무거나를 선택해서 3개가 같은지 판단합니다.
-     *
-     * @param participant1 첫 번째 참가자 이름
-     * @param participant2 두 번째 참가자 이름
-     * @return 3개의 같은 숫자가 있는 경우 true, 그렇지 않은 경우 false
-     */
-    fun hasTripleMatchWithFloorCard(participant1: String, participant2: String): Boolean {
-        return cardService.hasTripleMatchWithFloorCard(participant1, participant2)
+                // 같은 번호 모은거는 따로 모아놓기
+                participant.collectionSet = ArrayList(participant.cards.filter { it.number == target }.toMutableList())
+
+                // 사용자 카드 리스트에서 같은 번호 모은거는 제거
+                participant.cards = participant.cards.filterNot { it.number == target }.toMutableList()
+            }
+        }
+
+        gameRepository.getParticipants().map{ id ->
+            val participant = gameRepository.getParticipant(id)
+            participant.selectedCard.clear()
+            participant.leftSelectIndex = 0
+            participant.rightSelectIndex= participant.cards.size-1
+        }
     }
 
     fun isNextTurn(): Int{
@@ -78,7 +92,7 @@ class LuckyGame(participantCount: Int) {
      * @return 바닥 카드 리스트
      */
     fun getFloorCards(): List<Card> {
-        return cardRepository.getFloorCards()
+        return gameRepository.getFloorCards()
     }
 
     /**
@@ -88,7 +102,7 @@ class LuckyGame(participantCount: Int) {
      * @return 참가자의 카드 리스트
      */
     fun getParticipantCards(participant: String): List<Card>? {
-        return cardRepository.getCardsForParticipant(participant)
+        return gameRepository.getCardsForParticipant(participant)
     }
 
     /**
@@ -97,6 +111,18 @@ class LuckyGame(participantCount: Int) {
      * @return 참가자들의 이름 집합
      */
     fun getParticipants(): Set<String> {
-        return cardRepository.getParticipants()
+        return gameRepository.getParticipants()
+    }
+
+    /**
+     * 특정 참가자의 객체를 반환 합니다.
+     */
+    fun getParticipant(participantId: String): Participant {
+        return gameRepository.getParticipant(participantId)
+    }
+
+    fun getParticipantsTripleSelectedCardNum(): Map<String, List<Int>> {
+        return gameRepository.getTripleSelectedCards()
     }
 }
+
