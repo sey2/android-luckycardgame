@@ -2,7 +2,8 @@ import com.example.luckycardgame.R
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.model.LuckyGame
-import com.example.luckycardgame.repository.CardRepository
+import com.example.luckycardgame.model.Participant
+import com.example.luckycardgame.repository.GameRepository
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
@@ -16,7 +17,7 @@ class LuckyGameTest {
     private lateinit var game: LuckyGame
 
     @Mock
-    private lateinit var cardRepository: CardRepository
+    private lateinit var cardRepository: GameRepository
 
     /***
      * 테스트 클래스에서 game 참가자를 따로 설정 해주지 않으면 최소 인원 수를 3명으로 설정
@@ -26,6 +27,24 @@ class LuckyGameTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         Mockito.`when`(cardRepository.getAllCards(false)).thenReturn(getMockCards())
+
+        // 가짜 객체 생성
+        val mockParticipant = Participant("Participant 0",
+            mutableListOf(
+                Card(CardType.Dog, 1, 1, false),
+                Card(CardType.Dog, 1, 1, false),
+                Card(CardType.Dog, 1, 1, false),
+                Card(CardType.Dog, 2, 1, false),
+                Card(CardType.Dog, 2, 1, false),
+                Card(CardType.Dog, 2, 1, false),
+                Card(CardType.Dog, 7, 1, false),
+                Card(CardType.Dog, 8, 1, false),
+            ),
+            hashSetOf(1,2,3,4,5,6,7,8),
+            0,7,0)
+
+        // 해당 함수를 불렀을 떄 가짜 객체를 반환 하도록 설정
+        Mockito.`when`(cardRepository.getParticipant("Participant 0")).thenReturn(mockParticipant)
 
         game = LuckyGame(3)
     }
@@ -122,7 +141,7 @@ class LuckyGameTest {
             assertNotNull(game.getParticipantCards(participant))
 
             // Act
-            game.sortParticipantCards(participant, false)
+            game.service.sortParticipantCards(participant, false)
 
             // Assert
             val sortedCards = game.getParticipantCards(participant)
@@ -142,14 +161,14 @@ class LuckyGameTest {
 
         val participantCard = game.getParticipantCards("Participant 0")
 
-        game.cardService.participantsCardPrint(participantCard as MutableList<Card>)
+        game.service.participantsCardPrint(participantCard as MutableList<Card>)
 
-        game.sortParticipantCards("Participant 0", false)
+        game.service.sortParticipantCards("Participant 0", false)
         val sortedCards = game.getParticipantCards("Participant 0")
 
         println()
         assertNotNull(sortedCards)
-        game.cardService.participantsCardPrint(sortedCards as MutableList<Card>)
+        game.service.participantsCardPrint(sortedCards as MutableList<Card>)
 
         for (i in 0 until sortedCards!!.size - 1) {
             assertTrue(sortedCards[i].number <= sortedCards[i + 1].number)
@@ -169,7 +188,7 @@ class LuckyGameTest {
             assertNotNull(game.getParticipantCards(participant))
 
             // Act
-            game.sortParticipantCards(participant, reverse = true)
+            game.service.sortParticipantCards(participant, reverse = true)
 
             // Assert
             val sortedCards = game.getParticipantCards(participant)
@@ -187,7 +206,7 @@ class LuckyGameTest {
     @Test
     fun game_sortFloorCards_checkAscendingSorting() {
         // Act
-        game.sortFloorCards(false)
+        game.service.sortFloorCards(false)
 
         // Assert
         val sortedCards = game.getFloorCards()
@@ -205,7 +224,7 @@ class LuckyGameTest {
      */
     @Test
     fun game_isTripleMatchPresent_checkTripleMatch() {
-        val isTriplePresent = game.isTripleMatchPresent()
+        val isTriplePresent = game.service.isTripleMatchPresent()
         assertTrue(isTriplePresent)
     }
 
@@ -221,10 +240,26 @@ class LuckyGameTest {
         val participant2 = "Participant 1"
 
         // 테스트 시작
-        val hasTripleMatch = game.hasTripleMatchWithFloorCard(participant1, participant2)
+        val hasTripleMatch = game.service.hasTripleMatchWithFloorCard(participant1, participant2)
 
         // 결과 검증
         assertTrue(hasTripleMatch)
+    }
+
+    /**
+     * 참가자들의 모든 턴이 끝나면 참가자들이 선택한 카드 중에서 같은 번호를 추출하는 메소드가 올바르게 동작하는지
+     * 검증하는 메소드
+     */
+    @Test
+    fun game_getTripleSelectedCard_ReturnTrue(){
+        val participant = cardRepository.getParticipant("Participant 0")
+
+        game.getParticipantsTripleSelectedCardNum()
+
+//        val tripleCardSet = cardRepository.getTripleSelectedCards()
+//
+//        tripleCardSet["Participant 0"]?.let { assertEquals(1, it[0]) }
+//        tripleCardSet["Participant 0"]?.let { assertEquals(2, it[0]) }
     }
 
 

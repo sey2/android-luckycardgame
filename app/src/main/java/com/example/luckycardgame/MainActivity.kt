@@ -1,131 +1,121 @@
 package com.example.luckycardgame
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.adapter.CardAdapter
+import com.example.luckycardgame.adapter.ItemOffsetDecoration
 import com.example.luckycardgame.databinding.ActivityMainBinding
-import com.example.luckycardgame.model.Card
+import com.example.luckycardgame.`interface`.OnCardClickListener
 import com.example.luckycardgame.model.LuckyGame
 import com.google.android.material.button.MaterialButton
 
-class MainActivity : AppCompatActivity() {
-    lateinit var game: LuckyGame
+
+class MainActivity : AppCompatActivity(), OnCardClickListener {
+
+    private var game: LuckyGame = LuckyGame(5)
     private lateinit var binding: ActivityMainBinding
+    private var recyclerViews: ArrayList<RecyclerView> = arrayListOf()
+    private var buttons: ArrayList<MaterialButton> = arrayListOf()
+    private var tvTags: ArrayList<TextView> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.rootLayout)
 
-        val recyclerViews = arrayListOf(
-            binding.item1Recycler,
-            binding.item2Recycler,
-            binding.item3Recycler,
-            binding.item4Recycler,
-            binding.item5Recycler
-        )
+        recyclerViews = arrayListOf(binding.item1Recycler,
+            binding.item2Recycler, binding.item3Recycler,
+            binding.item4Recycler, binding.item5Recycler)
 
-        val buttons = arrayListOf(binding.button1, binding.button2, binding.button3)
+        val itemDecoration = ItemOffsetDecoration(-50)
+        recyclerViews.forEach {it.addItemDecoration(itemDecoration)}
 
-        val tvTags = arrayListOf(
-            binding.tv1Tag,
-            binding.tv2Tag,
-            binding.tv3Tag,
-            binding.tv4Tag,
-            binding.tv5Tag
-        )
+        buttons = arrayListOf(binding.button1, binding.button2, binding.button3)
+        tvTags = arrayListOf(binding.tv1Tag, binding.tv2Tag, binding.tv3Tag, binding.tv4Tag, binding.tv5Tag)
 
-        game = LuckyGame(5)
-
-        binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+        binding.toggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) {
-                handleUncheckedState(buttons, checkedId)
+                hideViews(recyclerViews)
+                resetButtonsDrawable(buttons, checkedId)
+                clearBottomLayout()
             } else {
-                handleCheckedState(recyclerViews, buttons, checkedId)
+                showViews(recyclerViews)
+                handleCheckedState(buttons, checkedId)
+                setTurnRecyclerViews()
             }
         }
     }
 
-    private fun handleUncheckedState(buttons: ArrayList<MaterialButton>, checkedId: Int) {
+    private fun clearBottomLayout() {
+        recyclerViews.forEach { it.adapter = null }
+    }
+
+
+    private fun hideViews(views: List<View>) {
+        views.forEach { it.visibility = View.GONE }
+    }
+
+    private fun showViews(views: List<View>) {
+        views.forEach { it.visibility = View.VISIBLE }
+    }
+    private fun resetButtonsDrawable(buttons: ArrayList<MaterialButton>, checkedId: Int) {
         buttons.forEach { button ->
             if (checkedId == button.id) {
-                buttons.forEach { innerButton ->
-                    innerButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                }
+                buttons.forEach { it.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0) }
             }
         }
     }
 
     private fun handleCheckedState(
-        recyclerViews: ArrayList<RecyclerView>,
         buttons: ArrayList<MaterialButton>,
         checkedId: Int
     ) {
+
         when (checkedId) {
-            binding.button1.id -> setupGameBoard(24, 3, 5, recyclerViews)
-            binding.button2.id -> setupGameBoard(28, 4, 4, recyclerViews)
-            binding.button3.id -> setupGameBoard(30, 5, 6, recyclerViews)
+            binding.button1.id ->  setupGameBoard( 3, 5)
+            binding.button2.id ->  setupGameBoard(4, 4)
+            binding.button3.id ->  setupGameBoard(5, 6)
         }
 
-        updateButtonState(buttons, checkedId)
+        setTurnRecyclerViews()
+        buttons.forEach { button -> updateButtonState(button, checkedId) }
     }
+    private fun updateButtonState(button: MaterialButton, checkedId: Int) {
+        if (checkedId == button.id) {
+            val visibility1 = if (button == buttons[0]) View.INVISIBLE else View.VISIBLE
+            val visibility2 = if (button == buttons[0] || button == buttons[1]) View.GONE else View.VISIBLE
 
-    private fun updateButtonState(buttons: ArrayList<MaterialButton>, checkedId: Int) {
-        buttons.forEachIndexed { index, button ->
-            if (checkedId == button.id) {
-                val visibility1 = if (index == 0) View.INVISIBLE else View.VISIBLE
-                val visibility2 = if (index == 0 || index == 1) View.GONE else View.VISIBLE
+            binding.tv4Tag.visibility = visibility1
+            binding.item4Recycler.visibility = visibility1
+            binding.tv5Tag.visibility = visibility2
+            binding.item5Recycler.visibility = visibility2
 
-                binding.tv4Tag.visibility = visibility1
-                binding.item4Recycler.visibility = visibility1
-                binding.tv5Tag.visibility = visibility2
-                binding.item5Recycler.visibility = visibility2
-
-                buttons.forEachIndexed { innerIndex, innerButton ->
-                    val drawableResId = if (index == innerIndex) R.drawable.baseline_check_20 else 0
-                    innerButton.setCompoundDrawablesWithIntrinsicBounds(
-                        drawableResId,
-                        0,
-                        0,
-                        0
-                    )
-                }
+            buttons.forEach { innerButton ->
+                val drawableResId = if (button == innerButton) R.drawable.baseline_check_20 else 0
+                innerButton.setCompoundDrawablesWithIntrinsicBounds(drawableResId, 0, 0, 0)
             }
         }
+
     }
 
     private fun setupGameBoard(
-        totalCardCount: Int,
         recyclerViewCount: Int,
         colCount: Int,
-        recyclerViews: ArrayList<RecyclerView>
     ) {
         game = LuckyGame(recyclerViewCount)
-
-        for (i in 1..recyclerViewCount) {
-            setupRecyclerView(
-                recyclerViews[i - 1],
-                (i - 1) != 0,
-                game.getParticipantCards("Participant ${i - 1}")
-            )
-        }
-
+        makeRecycler()
         setupGridLayout(colCount)
-
-        Log.d("ToggleBtn", "After: ${game.getTotalCardCount()}")
     }
-
-    @SuppressLint("ResourceType")
     private fun setupGridLayout(colCount: Int) {
         val (marginDp, paddingLeft, paddingTop) = when (colCount) {
             5 -> Triple(30, 8, 60)
@@ -137,11 +127,13 @@ class MainActivity : AppCompatActivity() {
         binding.bottomLayout.columnCount = colCount
         binding.bottomLayout.setPadding(paddingLeft, paddingTop, 0, 0)
 
+        // GridLayout에 동적으로 아이템 추가
         for (card in game.getFloorCards()) {
-            var cardView = LayoutInflater.from(this).inflate(R.layout.recycler_item, null)
+            val cardView = LayoutInflater.from(this).inflate(R.layout.recycler_item, null)
 
             cardView.layoutParams = ViewGroup.MarginLayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 leftMargin = marginDp
             }
@@ -154,19 +146,74 @@ class MainActivity : AppCompatActivity() {
             cardView.findViewById<TextView>(R.id.tv_topLeft).visibility = View.GONE
             cardView.findViewById<TextView>(R.id.tv_bottomRight).visibility = View.GONE
 
+            // 카드 뷰를 GridLayout에 추가
             binding.bottomLayout.addView(cardView)
         }
     }
 
-    private fun setupRecyclerView(
-        recyclerView: RecyclerView,
-        isBack: Boolean,
-        cardList: List<Card>?
-    ) {
-        val adapter = CardAdapter(cardList!!, isBack)
+    private fun setTurnRecyclerViews(){
+        tvTags[0].setBackgroundResource(R.drawable.item_linear_round_turn)
+        recyclerViews.forEach { (it.adapter as? CardAdapter)?.isClickable = false }
 
-        recyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerView.adapter = adapter
+        (recyclerViews[0].adapter as? CardAdapter)?.isClickable = true
+    }
+
+    private fun makeRecycler(){
+        for (i in 1..game.getParticipants().size) {
+            val cardList =  game.getParticipantCards("Participant ${i - 1}")
+
+            val adapter = CardAdapter(cardList!!, true, this)
+
+            recyclerViews[i-1].layoutManager =
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+            recyclerViews[i-1].adapter = adapter
+
+        }
+    }
+
+    private fun turnChange(){
+        game.turnRest()
+        makeRecycler()
+        setTurnRecyclerViews()
+        game.turn = 1
+    }
+
+    override fun onCardClick(cardIndex: Int, holder: CardAdapter.CardViewHolder) {
+        // 카드를 선택할 수 있는 경우, 카드 상태 업데이트 및 게임 상태 업데이트
+        if (game.canSelected(game.currentPlayerId, cardIndex)) {
+            val index = game.currentPlayerId.split(" ")[1].toInt()
+
+            val participant = game.getParticipant(game.currentPlayerId)
+            val participantNum = game.getParticipants().size
+
+            // 참가자가 선택한 카드가 3장이거나 선택할 수 있는 카드를 전부 선택 했을 때 다음 참가자의 턴으로 넘김
+            if ((participant.selectCount % 3 == 0 )|| participant.cards.size == participant.selectedCard.size) {
+                var nextIdx = if (index == participantNum-1) 0 else index + 1
+
+                game.currentPlayerId = "Participant $nextIdx"
+
+                (recyclerViews[nextIdx].adapter as? CardAdapter)?.isClickable = true
+                (recyclerViews[index].adapter as? CardAdapter)?.isClickable = false
+
+                tvTags[index].setBackgroundResource(R.drawable.item_linear_round)
+                tvTags[nextIdx].setBackgroundResource(R.drawable.item_linear_round_turn)
+
+                game.turn++
+
+                // 모든 참가자들이 턴을 돌았을 때
+                if(game.turn > game.getParticipants().size){
+                    turnChange()
+
+                    if(game.service.findSumAndSubResultSeven() != "none" || game.service.findParticipantWithSeven() != "none"
+                        || game.service.findParticipantsWithNoCards() != "none"){
+                        Toast.makeText(this, "게임 종료!", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+            }
+        }else{
+            Log.d("participant", "Method return Fail")
+        }
     }
 }
