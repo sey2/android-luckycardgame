@@ -4,7 +4,6 @@ import com.example.luckycardgame.repository.GameRepositoryImpl
 import com.example.luckycardgame.service.GameService
 import com.example.luckycardgame.service.GameServiceImpl
 import org.junit.Test
-
 import org.junit.Assert.*
 
 /**
@@ -21,8 +20,13 @@ class ExampleUnitTest {
         assertEquals(4, 2 + 2)
     }
 
-    @Test
-    fun cardProperties_print_success() = gameService.participantsCardPrint(gameRepository.getAllCards(false))
+    fun cardProperties_print_success() {
+        val allCards = cardRepository.getAllCards(false)
 
+        for (card in allCards) {
+            assertNotNull(card)
+            val emoji = UnicodeUtils.convertToEmoji(card.type)
+            println("Number: ${card.number}, Emoji: $emoji")
+        }
+    }
 }
-
