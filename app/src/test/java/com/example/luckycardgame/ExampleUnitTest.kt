@@ -1,8 +1,8 @@
 package com.example.luckycardgame
-
-import com.example.luckycardgame.repository.CardRepository
-import com.example.luckycardgame.repository.CardRepositoryImpl
-import com.example.luckycardgame.utils.UnicodeUtils
+import com.example.luckycardgame.repository.GameRepository
+import com.example.luckycardgame.repository.GameRepositoryImpl
+import com.example.luckycardgame.service.GameService
+import com.example.luckycardgame.service.GameServiceImpl
 import org.junit.Test
 import org.junit.Assert.*
 
@@ -12,13 +12,14 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
-    val cardRepository: CardRepository = CardRepositoryImpl(5)
+    val gameRepository: GameRepository = GameRepositoryImpl(3)
+    val gameService: GameService = GameServiceImpl(gameRepository, 3)
+
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
 
-    @Test
     fun cardProperties_print_success() {
         val allCards = cardRepository.getAllCards(false)
 

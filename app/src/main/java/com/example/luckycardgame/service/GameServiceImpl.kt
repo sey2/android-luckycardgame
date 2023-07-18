@@ -94,7 +94,7 @@ class GameServiceImpl(
         // 모든 참가자의 collectionSet을 순회
         for (id1 in participantIds) {
             val participant1 = gameRepository.getParticipant(id1)
-            val collectionSet1 = participant1.collectionSet
+            val collectionSet1 = participant1.collectionSet.distinct()
 
             // 다른 모든 참가자의 collectionSet과 비교
             for (id2 in participantIds) {
@@ -102,12 +102,12 @@ class GameServiceImpl(
                 if (id1 == id2) continue
 
                 val participant2 = gameRepository.getParticipant(id2)
-                val collectionSet2 = participant2.collectionSet
+                val collectionSet2 = participant2.collectionSet.distinct()
 
                 // collectionSet1과 collectionSet2에 대해 가능한 모든 조합을 검사
-                for (num1 in collectionSet1) {
-                    for (num2 in collectionSet2) {
-                        if (num1 + num2 == 7 || abs(num1 - num2) == 7) {
+                for (card1 in collectionSet1) {
+                    for (card2 in collectionSet2) {
+                        if (card1.number + card2.number == 7 || abs(card1.number - card2.number) == 7) {
                             return "$id1@$id2"
                         }
                     }
@@ -119,8 +119,14 @@ class GameServiceImpl(
     }
 
     override fun findParticipantWithSeven(): String {
-        return gameRepository.getParticipants()
-            .firstOrNull { id -> 7 in gameRepository.getParticipant(id).collectionSet } ?: "none"
+        for (id in gameRepository.getParticipants()) {
+            if (gameRepository.getParticipant(id).collectionSet.any { it.number == 7 }) {
+                return id
+            }
+        }
+        return "none"
+//        return gameRepository.getParticipants()
+//            .firstOrNull { id -> 7 in gameRepository.getParticipant(id).collectionSet } ?: "none"
     }
 
     override fun findParticipantsWithNoCards(): String {

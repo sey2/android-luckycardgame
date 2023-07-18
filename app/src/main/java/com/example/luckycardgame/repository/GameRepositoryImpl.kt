@@ -48,10 +48,10 @@ class GameRepositoryImpl(private val participantCount: Int) : GameRepository {
     }
     override fun getAllCards(isBack: Boolean): MutableList<Card> {
         val cards = mutableListOf<Card>()
-
+        val cardTyps = listOf(CardType.Dog, CardType.Cow, CardType.Cat)
         for (number in 1..12) {
             repeat(3) {
-                cards.add(Card(getRandomCardType(), number, R.drawable.logo, isBack))
+                cards.add(Card(cardTyps[it], number, R.drawable.logo, isBack))
             }
         }
 

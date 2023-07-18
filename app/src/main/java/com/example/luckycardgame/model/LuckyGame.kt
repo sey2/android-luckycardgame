@@ -60,7 +60,7 @@ class LuckyGame(participantCount: Int) {
                 participant.removeSelectedCard(target)
 
                 // 같은 번호 모은거는 따로 모아놓기
-                participant.collectionSet = participant.cards.filter { it.number == target }.map { it.number }.toHashSet()
+                participant.collectionSet = ArrayList(participant.cards.filter { it.number == target }.toMutableList())
 
                 // 사용자 카드 리스트에서 같은 번호 모은거는 제거
                 participant.cards = participant.cards.filterNot { it.number == target }.toMutableList()
@@ -73,6 +73,17 @@ class LuckyGame(participantCount: Int) {
             participant.leftSelectIndex = 0
             participant.rightSelectIndex= participant.cards.size-1
         }
+    }
+
+    fun isNextTurn(): Int{
+        val index = currentPlayerId.split(" ")[1].toInt()
+        val participant = getParticipant(currentPlayerId)
+
+        if ((participant.selectCount % 3 == 0 )|| participant.cards.size == participant.selectedCard.size){
+            return index
+        }
+
+        return -1
     }
 
     /**
@@ -114,3 +125,4 @@ class LuckyGame(participantCount: Int) {
         return gameRepository.getTripleSelectedCards()
     }
 }
+

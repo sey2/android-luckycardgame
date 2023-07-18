@@ -1,5 +1,7 @@
 package com.example.luckycardgame
 
+import com.example.luckycardgame.model.Card
+import com.example.luckycardgame.model.CardType
 import com.example.luckycardgame.model.Participant
 import com.example.luckycardgame.repository.GameRepository
 import com.example.luckycardgame.service.GameServiceImpl
@@ -21,8 +23,15 @@ class FindSumAndSubResultSevenTest{
 
     @Test
     fun findSumAndSubResultSeven_subIsSeven_shouldReturnParticipantId() {
-        val participant1 = Participant("Participant 1", collectionSet = setOf(3,5) as HashSet<Int>, leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
-        val participant2 = Participant("Participant 2", collectionSet = setOf(10,11) as HashSet<Int>,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val card1 = Card(CardType.Dog, 1, 1 , false)
+        val card2 = Card(CardType.Cat, 1, 1,false)
+        val card3 = Card(CardType.Cow, 1, 1, false)
+        val card4 = Card(CardType.Dog, 8, 1 , false)
+        val card5 = Card(CardType.Cat, 8, 1,false)
+        val card6 = Card(CardType.Cow, 8, 1, false)
+
+        val participant1 = Participant("Participant 1", collectionSet = arrayListOf(card1, card2, card3), leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val participant2 = Participant("Participant 2", collectionSet = arrayListOf(card4,card5, card6) ,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
 
         Mockito.`when`(gameRepository.getParticipant("Participant 1")).thenReturn(participant1)
         Mockito.`when`(gameRepository.getParticipant("Participant 2")).thenReturn(participant2)
@@ -33,9 +42,16 @@ class FindSumAndSubResultSevenTest{
     }
 
     @Test
-    fun findSumAndSubResultSeven_subIsNotSeven_shouldReturnContinue() {
-        val participant1 = Participant("Participant 1", collectionSet = setOf(2,5) as HashSet<Int>, leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
-        val participant2 = Participant("Participant 2", collectionSet = setOf(10,11) as HashSet<Int>,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+    fun findSumAndSubResultSeven_subIsNotSeven_shouldReturnNone() {
+        val card1 = Card(CardType.Dog, 1, 1 , false)
+        val card2 = Card(CardType.Cat, 1, 1,false)
+        val card3 = Card(CardType.Cow, 1, 1, false)
+        val card4 = Card(CardType.Dog, 5, 1 , false)
+        val card5 = Card(CardType.Cat, 5, 1,false)
+        val card6 = Card(CardType.Cow, 5, 1, false)
+
+        val participant1 = Participant("Participant 1", collectionSet = arrayListOf(card1, card2, card3), leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val participant2 = Participant("Participant 2", collectionSet = arrayListOf(card4,card5, card6) ,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
 
         Mockito.`when`(gameRepository.getParticipant("Participant 1")).thenReturn(participant1)
         Mockito.`when`(gameRepository.getParticipant("Participant 2")).thenReturn(participant2)
@@ -47,8 +63,15 @@ class FindSumAndSubResultSevenTest{
 
     @Test
     fun findSumAndSubResultSeven_sumIsSeven_shouldReturnParticipantId() {
-        val participant1 = Participant("Participant 1", collectionSet = setOf(1,5) as HashSet<Int>, leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
-        val participant2 = Participant("Participant 2", collectionSet = setOf(6,11) as HashSet<Int>,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val card1 = Card(CardType.Dog, 1, 1 , false)
+        val card2 = Card(CardType.Cat, 1, 1,false)
+        val card3 = Card(CardType.Cow, 1, 1, false)
+        val card4 = Card(CardType.Dog, 6, 1 , false)
+        val card5 = Card(CardType.Cat, 6, 1,false)
+        val card6 = Card(CardType.Cow, 6, 1, false)
+
+        val participant1 = Participant("Participant 1", collectionSet = arrayListOf(card1, card2, card3), leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val participant2 = Participant("Participant 2", collectionSet = arrayListOf(card4,card5, card6) ,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
 
         Mockito.`when`(gameRepository.getParticipant("Participant 1")).thenReturn(participant1)
         Mockito.`when`(gameRepository.getParticipant("Participant 2")).thenReturn(participant2)
@@ -59,9 +82,16 @@ class FindSumAndSubResultSevenTest{
     }
 
     @Test
-    fun findSumAndSubResultSeven_sumIsNotSeven_shouldReturnTrue() {
-        val participant1 = Participant("Participant 1", collectionSet = setOf(1,5) as HashSet<Int>, leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
-        val participant2 = Participant("Participant 2", collectionSet = setOf(9,11) as HashSet<Int>,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+    fun findSumAndSubResultSeven_sumIsNotSeven_shouldReturnNone() {
+        val card1 = Card(CardType.Dog, 1, 1 , false)
+        val card2 = Card(CardType.Cat, 1, 1,false)
+        val card3 = Card(CardType.Cow, 1, 1, false)
+        val card4 = Card(CardType.Dog, 2, 1 , false)
+        val card5 = Card(CardType.Cat, 2, 1,false)
+        val card6 = Card(CardType.Cow, 2, 1, false)
+
+        val participant1 = Participant("Participant 1", collectionSet = arrayListOf(card1, card2, card3), leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
+        val participant2 = Participant("Participant 2", collectionSet = arrayListOf(card4,card5, card6) ,leftSelectIndex = 0, rightSelectIndex = 7, selectCount = 0)
 
         Mockito.`when`(gameRepository.getParticipant("Participant 1")).thenReturn(participant1)
         Mockito.`when`(gameRepository.getParticipant("Participant 2")).thenReturn(participant2)

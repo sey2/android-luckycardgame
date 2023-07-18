@@ -1,12 +1,10 @@
 package com.example.luckycardgame
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -53,6 +51,16 @@ class MainActivity : AppCompatActivity(), OnCardClickListener {
                 handleCheckedState(buttons, checkedId)
                 setTurnRecyclerViews()
             }
+        }
+
+        binding.btnRestart.setOnClickListener{
+            setupGameBoard(game.getParticipants().size, binding.bottomLayout.columnCount)
+            tvTags.forEach { it.setBackgroundResource(R.drawable.item_linear_round)}
+            binding.tvResult.visibility = View.GONE
+            binding.tvWinner.visibility = View.GONE
+            binding.btnRestart.visibility = View.GONE
+            binding.bottomLayout.visibility = View.VISIBLE
+            binding.toggleButton.visibility = View.VISIBLE
         }
     }
 
@@ -118,10 +126,12 @@ class MainActivity : AppCompatActivity(), OnCardClickListener {
     }
     private fun setupGridLayout(colCount: Int) {
         val (marginDp, paddingLeft, paddingTop) = when (colCount) {
-            5 -> Triple(30, 8, 60)
-            4 -> Triple(54, 32, 60)
-            else -> Triple(4, 4, 30)
+            5 -> Triple(30, 8, 120)
+            4 -> Triple(54, 32, 120)
+            else -> Triple(4, 4, 70)
         }
+
+        tvTags.forEach { it.text = "" }
 
         binding.bottomLayout.removeAllViews()
         binding.bottomLayout.columnCount = colCount
@@ -179,17 +189,41 @@ class MainActivity : AppCompatActivity(), OnCardClickListener {
         game.turn = 1
     }
 
+    private fun showResultView(combinedResults: List<String>){
+        if(combinedResults.isNotEmpty()){
+            binding.tvResult.visibility = View.VISIBLE
+            binding.tvWinner.visibility = View.VISIBLE
+
+            tvTags[0].setBackgroundResource(R.drawable.item_linear_round)
+            recyclerViews.forEach { it.adapter = null }
+
+            combinedResults.forEach{ id ->
+                val cardList =  game.getParticipant(id).collectionSet
+                val adapter = CardAdapter(cardList!!, false, this)
+                val index = id.split(" ")[1].toInt()
+
+                recyclerViews[index].adapter = adapter
+                tvTags[index].setBackgroundResource(R.drawable.item_linear_round_turn)
+            }
+
+            val winnerList = combinedResults.map{ it.split(" ") [1].toInt() + 'A'.code}
+            var text = winnerList.sorted().joinToString(separator = ", ") { it.toChar().toString() }
+
+            binding.tvWinner.text = "이번 게임은 " + text + "사용자가 승리했습니다"
+            binding.btnRestart.visibility = View.VISIBLE
+            binding.bottomLayout.visibility = View.GONE
+            binding.toggleButton.visibility = View.INVISIBLE
+        }
+    }
+
     override fun onCardClick(cardIndex: Int, holder: CardAdapter.CardViewHolder) {
         // 카드를 선택할 수 있는 경우, 카드 상태 업데이트 및 게임 상태 업데이트
         if (game.canSelected(game.currentPlayerId, cardIndex)) {
-            val index = game.currentPlayerId.split(" ")[1].toInt()
-
-            val participant = game.getParticipant(game.currentPlayerId)
-            val participantNum = game.getParticipants().size
+            val index = game.isNextTurn()
 
             // 참가자가 선택한 카드가 3장이거나 선택할 수 있는 카드를 전부 선택 했을 때 다음 참가자의 턴으로 넘김
-            if ((participant.selectCount % 3 == 0 )|| participant.cards.size == participant.selectedCard.size) {
-                var nextIdx = if (index == participantNum-1) 0 else index + 1
+            if (index >= 0) {
+                var nextIdx = if (index == game.getParticipants().size - 1) 0 else index + 1
 
                 game.currentPlayerId = "Participant $nextIdx"
 
@@ -205,15 +239,23 @@ class MainActivity : AppCompatActivity(), OnCardClickListener {
                 if(game.turn > game.getParticipants().size){
                     turnChange()
 
-                    if(game.service.findSumAndSubResultSeven() != "none" || game.service.findParticipantWithSeven() != "none"
-                        || game.service.findParticipantsWithNoCards() != "none"){
-                        Toast.makeText(this, "게임 종료!", Toast.LENGTH_LONG).show()
-                    }
-                }
+                    // 턴이 끝났을시 우승자를 판별하는 조건이 3가지 이므로
+                    val winnerResult1 = game.service.findSumAndSubResultSeven().let { if (it == "none") listOf() else it.split("@") }
+                    val winnerResult2 = game.service.findParticipantWithSeven().let { if (it == "none") listOf() else it.split("@") }
+                    val winnerResult3 = game.service.findParticipantsWithNoCards().let { if (it == "none") listOf() else it.split("@") }
 
+
+                    // 우승 조건 여러개를 부합하는 참가자가 있을 수 있으므로
+                    val combinedResults = (winnerResult1 + winnerResult2 + winnerResult3).distinct()
+
+                    if(combinedResults.isNotEmpty()){
+                        showResultView(combinedResults)
+                    }
+
+                }
             }
-        }else{
-            Log.d("participant", "Method return Fail")
         }
     }
 }
+
+

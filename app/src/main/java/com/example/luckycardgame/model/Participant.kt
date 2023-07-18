@@ -6,7 +6,7 @@ class Participant(
     var leftSelectIndex: Int,
     var rightSelectIndex: Int,
     var selectCount: Int,
-    var collectionSet: HashSet<Int> = HashSet<Int>()
+    var collectionSet: ArrayList<Card> = ArrayList<Card>()
 ) {
     fun addCard(card: Card) {
         cards.add(card)
