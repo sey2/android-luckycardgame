@@ -1,4 +1,4 @@
-# android-luckycardgame
+# android-luckycardgame (23.07.03 ~ 23.07.14)
 
 ## Step 1-1 (Layout 틀 구성) [07.03 15:30]
 
@@ -51,3 +51,20 @@
     <td align="center"><b>결과 화면 2</b></td>
   </tr>
 </table>
+
+## (Step 1-6) 구현 사항
+
+### UI
+- 자잘한 layout 버그 수정
+- 게임 결과화면 구현
+---
+
+### 게임 종료 조건을 판단하는 함수 테스트 코드 작성
+- 참여자가 모은 카드의 합 또는 차가 7이 되는 경우
+- 참여자 중 한명이 카드번호가 7번인 카드 3장을 모으는 경우
+- 카드를 다 버린 참가자가 있는 경우
+---
+
+
+### 결과화면
+<img width="456" alt="스크린샷 2023-07-14 오전 12 00 48" src="https://github.com/softeerbootcamp-2nd/android-luckycardgame/assets/54762273/f2e8f1b5-b3e6-4e27-b5a4-7aea1175fdd0">
