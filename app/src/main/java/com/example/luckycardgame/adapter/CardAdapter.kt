@@ -3,7 +3,6 @@ package com.example.luckycardgame.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.R
 import com.example.luckycardgame.databinding.RecyclerItemBinding
-import com.example.luckycardgame.`interface`.OnCardClickListener
+import com.example.luckycardgame.listener.OnCardClickListener
 import com.example.luckycardgame.model.Card
 import com.example.luckycardgame.utils.UnicodeUtils
 

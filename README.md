@@ -67,4 +67,4 @@
 
 
 ### 결과화면
-<img width="456" alt="스크린샷 2023-07-14 오전 12 00 48" src="https://github.com/softeerbootcamp-2nd/android-luckycardgame/assets/54762273/f2e8f1b5-b3e6-4e27-b5a4-7aea1175fdd0">
+![ezgif com-video-to-gif (1)](https://github.com/sey2/CodingTest/assets/54762273/cabf6a8c-dbf7-4606-b193-df9023a273af)

@@ -1,4 +1,4 @@
-package com.example.luckycardgame.`interface`
+package com.example.luckycardgame.listener
 
 import com.example.luckycardgame.adapter.CardAdapter
 

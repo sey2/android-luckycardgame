@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.luckycardgame.adapter.CardAdapter
 import com.example.luckycardgame.adapter.ItemOffsetDecoration
 import com.example.luckycardgame.databinding.ActivityMainBinding
-import com.example.luckycardgame.`interface`.OnCardClickListener
+import com.example.luckycardgame.listener.OnCardClickListener
 import com.example.luckycardgame.model.LuckyGame
 import com.google.android.material.button.MaterialButton
 
